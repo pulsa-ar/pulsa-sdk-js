@@ -4,3 +4,4 @@ coverage/
 *.local.test.ts
 .env
 .env.*
+demo-dist/

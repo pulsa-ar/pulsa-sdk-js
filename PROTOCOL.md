@@ -47,7 +47,7 @@ cannot set headers on a WebSocket, and URLs end up in logs.
 | `vocabulary` | Optional. The only signs to recognise. It can narrow what the key allows, never widen it. Signs outside it are ignored, not read as the nearest allowed one. |
 
 Live keys work only from the origins they were issued for. Test keys also work from
-`localhost`, `127.0.0.1` and `[::1]` on any port.
+`localhost`, `127.0.0.1` and `[::1]` on any port, and from `https://demo.pulsa.ar`.
 
 ### Landmark frame (binary)
 

@@ -19,7 +19,8 @@ Or without a bundler:
 ```
 
 You need a publishable API key from pulsa. A **test key** (`pulsa_pk_test_...`) works from
-`localhost` on any port. A **live key** (`pulsa_pk_live_...`) works only from the sites it was
+`localhost` on any port and from the demo at https://demo.pulsa.ar, where you can try it
+before writing any code. A **live key** (`pulsa_pk_live_...`) works only from the sites it was
 issued for.
 
 ## Use
@@ -104,10 +105,14 @@ npm test            # unit tests
 npm run typecheck
 npm run build       # dist/: npm entries, the standalone dist/pulsa.js, type declarations
 npm run dev         # examples/ at http://localhost:5173, against the source
+npm run build:demo  # examples/ built into demo-dist/, as published
 ```
 
-The example page takes `?key=...&endpoint=ws://localhost:8000/v1/stream` to try the
-component against a local pulsa server.
+The example page is the demo. Under `npm run dev` it talks to a local pulsa server at
+`ws://localhost:8000/v1/stream`; built, to `wss://api.pulsa.ar`. It reads nothing from its
+address, so a shared link can neither carry a key nor point one at another server.
+
+Pushing a `v*` tag publishes it to https://demo.pulsa.ar (`.github/workflows/demo.yml`).
 
 The wire protocol is specified in [PROTOCOL.md](PROTOCOL.md).
 `test/fixtures/landmark-frame.hex` was written by the server's encoder, so the client's

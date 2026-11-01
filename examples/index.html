@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>pulsa SDK example</title>
+    <title>pulsa demo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap" />
     <style>
@@ -19,14 +19,15 @@
     </style>
   </head>
   <body>
-    <h1>pulsa SDK</h1>
+    <h1>pulsa demo</h1>
     <p>
-      Pass <code>?key=pulsa_pk_test_…</code> (and <code>&amp;endpoint=ws://localhost:8000/v1/stream</code> for a
-      local server) in the URL, or fill these in.
+      Paste the test key pulsa gave you and start signing. The video stays in your browser: only
+      body and hand landmarks are sent to pulsa. Every element here is the
+      <a href="https://github.com/pulsa-ar/pulsa-sdk-js">pulsa SDK</a> you embed on your own site.
     </p>
     <form id="settings">
       <label for="key">API key</label><input id="key" type="text" autocomplete="off" />
-      <label for="endpoint">Endpoint</label><input id="endpoint" type="text" placeholder="wss://api.pulsa.ar/v1/stream" />
+      <label for="endpoint">Endpoint</label><input id="endpoint" type="text" />
       <label for="vocabulary">Vocabulary</label><input id="vocabulary" type="text" placeholder="all the key allows, or e.g. YO,DOLOR" />
       <span></span><button type="submit">Start</button>
     </form>
@@ -42,15 +43,15 @@
     <div id="log" aria-live="polite"></div>
 
     <script type="module">
-      import "../src/index.ts";
+      import { DEFAULT_ENDPOINT } from "../src/index.ts";
 
       const recognizer = document.querySelector("pulsa-recognizer");
       const log = document.getElementById("log");
       const field = (id) => document.getElementById(id);
-      const parameters = new URLSearchParams(location.search);
-      field("key").value = parameters.get("key") ?? "";
-      field("endpoint").value = parameters.get("endpoint") ?? "";
-      field("vocabulary").value = parameters.get("vocabulary") ?? "";
+      // Nothing is read from the address: a shared link must not carry a key, nor point
+      // a key someone pastes at another server. `npm run dev` talks to a local server.
+      const defaultEndpoint = import.meta.env.DEV ? "ws://localhost:8000/v1/stream" : DEFAULT_ENDPOINT;
+      field("endpoint").value = defaultEndpoint;
 
       const write = (line) => {
         log.textContent = `${new Date().toLocaleTimeString()}  ${line}\n` + log.textContent;
@@ -76,7 +77,6 @@
       field("show-glosses").addEventListener("change", (event) => recognizer.toggleAttribute("show-glosses", event.target.checked));
       field("mirrored").addEventListener("change", (event) => recognizer.setAttribute("mirrored", String(event.target.checked)));
       field("locale").addEventListener("change", (event) => recognizer.setAttribute("locale", event.target.value));
-      if (field("key").value) start();
     </script>
   </body>
 </html>
