@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pulsa SDK example</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap" />
+    <style>
+      :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+      body { margin: 0 auto; padding: 16px; max-width: 760px; }
+      h1 { font-family: Outfit, system-ui, sans-serif; font-weight: 600; }
+      form { display: grid; grid-template-columns: max-content 1fr; gap: 8px 12px; margin-bottom: 16px; }
+      input[type="text"] { width: 100%; box-sizing: border-box; font: inherit; }
+      .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 12px 0; }
+      #log { font: 13px/1.5 ui-monospace, monospace; white-space: pre-wrap; max-height: 260px; overflow: auto;
+             padding: 8px; border-radius: 8px; background: color-mix(in srgb, currentColor 6%, transparent); }
+      pulsa-recognizer { max-width: 100%; }
+    </style>
+  </head>
+  <body>
+    <h1>pulsa SDK</h1>
+    <p>
+      Pass <code>?key=pulsa_pk_test_…</code> (and <code>&amp;endpoint=ws://localhost:8000/v1/stream</code> for a
+      local server) in the URL, or fill these in.
+    </p>
+    <form id="settings">
+      <label for="key">API key</label><input id="key" type="text" autocomplete="off" />
+      <label for="endpoint">Endpoint</label><input id="endpoint" type="text" placeholder="wss://api.pulsa.ar/v1/stream" />
+      <label for="vocabulary">Vocabulary</label><input id="vocabulary" type="text" placeholder="all the key allows, or e.g. YO,DOLOR" />
+      <span></span><button type="submit">Start</button>
+    </form>
+
+    <pulsa-recognizer show-glosses></pulsa-recognizer>
+
+    <div class="controls">
+      <button id="reset" type="button">Reset sentence</button>
+      <label><input id="show-glosses" type="checkbox" checked /> Show glosses</label>
+      <label><input id="mirrored" type="checkbox" checked /> Mirrored</label>
+      <label>Locale <select id="locale"><option>es</option><option>en</option></select></label>
+    </div>
+    <div id="log" aria-live="polite"></div>
+
+    <script type="module">
+      import "../src/index.ts";
+
+      const recognizer = document.querySelector("pulsa-recognizer");
+      const log = document.getElementById("log");
+      const field = (id) => document.getElementById(id);
+      const parameters = new URLSearchParams(location.search);
+      field("key").value = parameters.get("key") ?? "";
+      field("endpoint").value = parameters.get("endpoint") ?? "";
+      field("vocabulary").value = parameters.get("vocabulary") ?? "";
+
+      const write = (line) => {
+        log.textContent = `${new Date().toLocaleTimeString()}  ${line}\n` + log.textContent;
+      };
+      recognizer.onStatus = (status) => write(`status: ${status}`);
+      recognizer.onReady = (signs) => write(`ready: ${signs.length} signs`);
+      recognizer.onSentence = ({ text, pending }) => write(`sentence: ${text.join(" ")}  [pending: ${pending.join(" ")}]`);
+      recognizer.onSentenceFinished = ({ glosses, text }) => write(`FINISHED: ${text.join(" ")}  (${glosses.join(" ")})`);
+      recognizer.onError = (error) => write(`error${error.fatal ? " (fatal)" : ""}: ${error.code} - ${error.message}`);
+
+      const setOrRemove = (name, value) =>
+        value ? recognizer.setAttribute(name, value) : recognizer.removeAttribute(name);
+      const start = () => {
+        setOrRemove("endpoint", field("endpoint").value.trim());
+        setOrRemove("vocabulary", field("vocabulary").value.trim());
+        setOrRemove("api-key", field("key").value.trim());
+      };
+      field("settings").addEventListener("submit", (event) => {
+        event.preventDefault();
+        start();
+      });
+      field("reset").addEventListener("click", () => recognizer.reset());
+      field("show-glosses").addEventListener("change", (event) => recognizer.toggleAttribute("show-glosses", event.target.checked));
+      field("mirrored").addEventListener("change", (event) => recognizer.setAttribute("mirrored", String(event.target.checked)));
+      field("locale").addEventListener("change", (event) => recognizer.setAttribute("locale", event.target.value));
+      if (field("key").value) start();
+    </script>
+  </body>
+</html>
