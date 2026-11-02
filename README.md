@@ -112,7 +112,10 @@ The example page is the demo. Under `npm run dev` it talks to a local pulsa serv
 `ws://localhost:8000/v1/stream`; built, to `wss://api.pulsa.ar`. It reads nothing from its
 address, so a shared link can neither carry a key nor point one at another server.
 
-Pushing a `v*` tag publishes it to https://demo.pulsa.ar (`.github/workflows/demo.yml`).
+To release, bump `version` in `package.json` and push a matching `v*` tag. The tag publishes
+the package to npm (`.github/workflows/publish.yml`, through npm trusted publishing, so no npm
+token exists) and the demo to https://demo.pulsa.ar (`.github/workflows/demo.yml`). A
+published version can never be replaced, so a fix is always a new version.
 
 The wire protocol is specified in [PROTOCOL.md](PROTOCOL.md).
 `test/fixtures/landmark-frame.hex` was written by the server's encoder, so the client's

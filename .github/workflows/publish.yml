@@ -1,0 +1,54 @@
+# Publishes @pulsa/sdk to npm for each release tag. npm trusts this workflow directly
+# (trusted publishing, configured on the package's npm settings page), so no npm token is
+# stored anywhere, and each version carries provenance linking it to the commit it was built from.
+name: Publish
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or newer; Node 22 ships an older one.
+      - run: npm install --global npm@11
+
+      - name: Check the tag matches package.json
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version}"
+            exit 1
+          fi
+
+      # A version on npm can never be replaced, so a re-run, or a version first published by
+      # hand, ends here instead of failing.
+      - name: Check the version is not on npm yet
+        id: registry
+        run: |
+          package="$(node -p 'require("./package.json").name')@$(node -p 'require("./package.json").version')"
+          if npm view "${package}" version > /dev/null 2>&1; then
+            echo "::notice::${package} is already on npm"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.registry.outputs.published != 'true'
+        run: npm ci
+      # prepublishOnly typechecks, tests and builds first.
+      - if: steps.registry.outputs.published != 'true'
+        run: npm publish

@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "description": "Argentine Sign Language (LSA) recognition in the browser: a camera component that streams to the pulsa API and reports glosses.",
   "license": "MIT",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pulsa-ar/pulsa-sdk-js.git"
+  },
+  "homepage": "https://demo.pulsa.ar",
+  "publishConfig": {
+    "access": "public"
   },
   "type": "module",
   "sideEffects": [
@@ -34,7 +37,8 @@
     "build:demo": "vite build --config vite.example.config.ts",
     "build": "vite build && vite build --config vite.standalone.config.ts && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "1.0.1"
