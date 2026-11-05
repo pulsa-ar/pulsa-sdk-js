@@ -1,6 +1,10 @@
-# Publishes @pulsa/sdk to npm for each release tag. npm trusts this workflow directly
-# (trusted publishing, configured on the package's npm settings page), so no npm token is
-# stored anywhere, and each version carries provenance linking it to the commit it was built from.
+# Stages @pulsa/sdk on npm for each release tag. npm trusts this workflow directly (trusted
+# publishing, configured on the package's npm settings page), so no npm token is stored
+# anywhere, and each version carries provenance linking it to the commit it was built from.
+#
+# Staged, not published: the version is uploaded but not installable until a maintainer
+# approves it with 2FA (on npmjs.com, or `npm stage approve`). CI cannot approve its own
+# upload, so a compromised workflow cannot ship a release on its own.
 name: Publish
 
 on:
@@ -16,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  stage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,8 +29,9 @@ jobs:
           node-version: 22
           cache: npm
           registry-url: https://registry.npmjs.org
-      # Trusted publishing needs npm 11.5.1 or newer; Node 22 ships an older one.
-      - run: npm install --global npm@11
+      # Staged publishing through trusted publishing needs npm 11.15 or newer; Node 22 ships
+      # an older one.
+      - run: npm install --global "npm@^11.15.0"
 
       - name: Check the tag matches package.json
         run: |
@@ -49,6 +54,9 @@ jobs:
 
       - if: steps.registry.outputs.published != 'true'
         run: npm ci
-      # prepublishOnly typechecks, tests and builds first.
       - if: steps.registry.outputs.published != 'true'
-        run: npm publish
+        run: npm run typecheck && npm test && npm run build
+      - if: steps.registry.outputs.published != 'true'
+        run: npm stage publish
+      - if: steps.registry.outputs.published != 'true'
+        run: echo "::notice::Staged. Approve it on npmjs.com with 2FA to make it installable."
