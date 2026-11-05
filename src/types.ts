@@ -12,6 +12,7 @@ export interface Sign {
  */
 export interface Sentence {
   readonly glosses: readonly string[];
+  /** The words to print. Not one per gloss: signs LSA combines into one meaning print as one word. */
   readonly text: readonly string[];
   readonly pending: readonly string[];
 }
@@ -19,6 +20,7 @@ export interface Sentence {
 /** A sentence the signer has finished, reported once. */
 export interface FinishedSentence {
   readonly glosses: readonly string[];
+  /** As in {@link Sentence.text}. */
   readonly text: readonly string[];
 }
 

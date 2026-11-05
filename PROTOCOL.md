@@ -103,6 +103,11 @@ The session is open, and `vocabulary` lists the signs it recognises. A session l
 
 Sent whenever the sentence or its pending signs change. It is always the **whole** sentence,
 because the recogniser can replace its last word, so replace what you show and never append.
+
+`text` is the words to print, not one entry per gloss. Some runs of signs mean one thing in
+LSA and print as one word: `["FIEBRE", "DOCTOR"]` comes with `["enfermo"]`. So `text` can be
+shorter than `glosses`, and a word already shown can change when the next sign lands. Print
+`text`; use `glosses` to act on what was signed.
 `pending` holds glosses seen but not yet committed.
 
 ### `sentence_finished`
