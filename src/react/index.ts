@@ -24,6 +24,8 @@ export interface PulsaRecognizerProps extends RecognizerCallbacks {
   /** Narrows what the key allows; omit for every sign it allows. */
   vocabulary?: readonly string[];
   showGlosses?: boolean;
+  /** For a left-handed signer: the model only knows right-handed signing, so frames are mirrored. */
+  leftHanded?: boolean;
   locale?: Locale;
   /** Mirrors the preview like a selfie camera; on by default. */
   mirrored?: boolean;
@@ -38,7 +40,7 @@ export interface PulsaRecognizerHandle {
 }
 
 function PulsaRecognizerComponent(props: PulsaRecognizerProps, ref: ForwardedRef<PulsaRecognizerHandle>) {
-  const { apiKey, vocabulary, showGlosses, locale, mirrored, endpoint, className, style } = props;
+  const { apiKey, vocabulary, showGlosses, leftHanded, locale, mirrored, endpoint, className, style } = props;
   const element = useRef<PulsaRecognizerElement>(null);
 
   useImperativeHandle(ref, () => ({ reset: () => element.current?.reset() }), []);
@@ -60,6 +62,7 @@ function PulsaRecognizerComponent(props: PulsaRecognizerProps, ref: ForwardedRef
     "api-key": apiKey,
     vocabulary: vocabulary?.join(","),
     "show-glosses": showGlosses ? "" : undefined,
+    "left-handed": leftHanded ? "" : undefined,
     locale,
     mirrored: mirrored === false ? "false" : undefined,
     endpoint,

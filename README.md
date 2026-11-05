@@ -15,7 +15,7 @@ npm install @pulsa/sdk
 Or without a bundler:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@pulsa/sdk@0.1.0/dist/pulsa.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@pulsa/sdk@0.2.0/dist/pulsa.js"></script>
 ```
 
 You need a publishable API key from pulsa. A **test key** (`pulsa_pk_test_...`) works from
@@ -66,6 +66,7 @@ To clear the sentence, pass a `ref` and call `ref.current.reset()`.
 |---|---|---|---|
 | `api-key` | `apiKey` | | Required. A publishable key. |
 | `vocabulary` | `vocabulary` | everything the key allows | Comma-separated glosses (`YO,DOLOR`). Narrows recognition: signs outside it are ignored. |
+| `left-handed` | `leftHanded` | off | For a left-handed signer. The model only knows right-handed signing, so each frame is mirrored before landmarks are extracted. Can change mid-session; the sentence is cleared. |
 | `show-glosses` | `showGlosses` | off | Shows the sentence over the camera feed; pending signs are lighter. |
 | `locale` | `locale` | the page's `lang`, else `es` | `es` or `en`, for the component's own messages. |
 | `mirrored` | `mirrored` | on | Mirrors the preview like a selfie camera. Recognition is unaffected. |

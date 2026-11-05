@@ -25,6 +25,8 @@ export interface RecognizerOptions {
   readonly endpoint?: string;
   readonly vocabulary?: readonly string[];
   readonly mediapipe?: MediaPipeAssets;
+  /** Mirrors the frames before MediaPipe, since the model only knows right-handed signing. */
+  readonly leftHanded?: boolean;
 }
 
 /** What the recogniser builds on; replaced in tests. */
@@ -62,13 +64,16 @@ export class Recognizer {
   private stopped = false;
   private readonly cleanups: (() => void)[] = [];
   private connection: FrameConnection | null = null;
+  private leftHanded: boolean;
 
   constructor(
     private readonly video: HTMLVideoElement,
     private readonly options: RecognizerOptions,
     private readonly callbacks: RecognizerCallbacks,
     private readonly dependencies: RecognizerDependencies = browserDependencies,
-  ) {}
+  ) {
+    this.leftHanded = options.leftHanded ?? false;
+  }
 
   /** Asks for the camera, loads MediaPipe, connects, and streams until stop(). */
   async start(): Promise<void> {
@@ -102,6 +107,16 @@ export class Recognizer {
     this.connection?.reset();
   }
 
+  /**
+   * Switches handedness without a new session. The sentence is cleared: signs read before
+   * and after the switch were not signed with the same hand.
+   */
+  setLeftHanded(leftHanded: boolean): void {
+    if (leftHanded === this.leftHanded) return;
+    this.leftHanded = leftHanded;
+    this.connection?.reset();
+  }
+
   stop(): void {
     this.stopped = true;
     this.release();
@@ -116,7 +131,7 @@ export class Recognizer {
     this.cleanups.push(this.dependencies.scheduleVideoFrames(this.video, (captureTimeMs) => {
       // MediaPipe is the expensive part; skip it while no session would use the result.
       if (connection.acceptsFrames) {
-        connection.sendFrame(captureTimeMs, extractor.extract(this.video, captureTimeMs));
+        connection.sendFrame(captureTimeMs, extractor.extract(this.video, captureTimeMs, this.leftHanded));
       }
     }));
     connection.open(camera.frameSize());

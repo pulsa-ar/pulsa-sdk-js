@@ -5,13 +5,13 @@ import { Recognizer } from "../src/recognizer/recognizer";
 import type { PulsaError, RecognizerStatus, Sentence } from "../src/types";
 import { FakePipeline, settle } from "./fakePipeline";
 
-function startRecognizer(pipeline = new FakePipeline()) {
+function startRecognizer(pipeline = new FakePipeline(), leftHanded = false) {
   const statuses: RecognizerStatus[] = [];
   const errors: PulsaError[] = [];
   const sentences: Sentence[] = [];
   const recognizer = new Recognizer(
     document.createElement("video"),
-    { apiKey: "pulsa_pk_test_key", vocabulary: ["YO"] },
+    { apiKey: "pulsa_pk_test_key", vocabulary: ["YO"], leftHanded },
     {
       onStatus: (status) => statuses.push(status),
       onError: (error) => errors.push(error),
@@ -45,6 +45,31 @@ describe("Recognizer", () => {
 
     expect(pipeline.extractor.extractedAt).toEqual([33]);
     expect(pipeline.connection.sentAt).toEqual([33]);
+  });
+
+  it("mirrors the frames of a left-handed signer before MediaPipe", async () => {
+    const { pipeline, started } = startRecognizer(new FakePipeline(), true);
+    await started;
+    pipeline.connection.becomes("ready");
+    pipeline.cameraDeliversFrame(0);
+
+    expect(pipeline.extractor.mirrored).toEqual([true]);
+  });
+
+  it("switches handedness mid-session, clearing the sentence once", async () => {
+    const { recognizer, pipeline, started } = startRecognizer();
+    await started;
+    pipeline.connection.becomes("ready");
+    pipeline.cameraDeliversFrame(0);
+    recognizer.setLeftHanded(true);
+    recognizer.setLeftHanded(true);
+    pipeline.cameraDeliversFrame(33);
+    recognizer.setLeftHanded(false);
+    pipeline.cameraDeliversFrame(66);
+
+    expect(pipeline.extractor.mirrored).toEqual([false, true, false]);
+    expect(pipeline.connection.resets).toEqual([undefined, undefined]);
+    expect(pipeline.connections).toHaveLength(1);
   });
 
   it("tells the server when the camera's frame size changes", async () => {

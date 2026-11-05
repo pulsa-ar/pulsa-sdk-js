@@ -1,6 +1,6 @@
 {
   "name": "@pulsa/sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Argentine Sign Language (LSA) recognition in the browser: a camera component that streams to the pulsa API and reports glosses.",
   "license": "MIT",
   "repository": {

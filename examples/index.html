@@ -36,6 +36,7 @@
 
     <div class="controls">
       <button id="reset" type="button">Reset sentence</button>
+      <label><input id="left-handed" type="checkbox" /> Left-handed signer</label>
       <label><input id="show-glosses" type="checkbox" checked /> Show glosses</label>
       <label><input id="mirrored" type="checkbox" checked /> Mirrored</label>
       <label>Locale <select id="locale"><option>es</option><option>en</option></select></label>
@@ -74,6 +75,10 @@
         start();
       });
       field("reset").addEventListener("click", () => recognizer.reset());
+      field("left-handed").addEventListener("change", (event) => {
+        recognizer.toggleAttribute("left-handed", event.target.checked);
+        write(event.target.checked ? "left-handed: frames are mirrored" : "right-handed");
+      });
       field("show-glosses").addEventListener("change", (event) => recognizer.toggleAttribute("show-glosses", event.target.checked));
       field("mirrored").addEventListener("change", (event) => recognizer.setAttribute("mirrored", String(event.target.checked)));
       field("locale").addEventListener("change", (event) => recognizer.setAttribute("locale", event.target.value));

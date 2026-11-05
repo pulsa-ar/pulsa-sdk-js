@@ -1,10 +1,14 @@
 import { FilesetResolver, HolisticLandmarker, type HolisticLandmarkerOptions } from "@mediapipe/tasks-vision";
 
+import { FrameMirror } from "./frameMirror";
 import { packLandmarks } from "./packLandmarks";
 
 export interface LandmarkExtractor {
-  /** The landmarks in `video`'s current frame, captured at `timestampMs`, which must only grow. */
-  extract(video: HTMLVideoElement, timestampMs: number): Float32Array;
+  /**
+   * The landmarks in `video`'s current frame, captured at `timestampMs`, which must only grow.
+   * `mirrored` flips the frame first, for a left-handed signer; see FrameMirror.
+   */
+  extract(video: HTMLVideoElement, timestampMs: number, mirrored: boolean): Float32Array;
   close(): void;
 }
 
@@ -38,8 +42,10 @@ export async function createLandmarkExtractor(
 ): Promise<LandmarkExtractor> {
   const fileset = await FilesetResolver.forVisionTasks(assets.wasmBaseUrl);
   const landmarker = await createWithBestDelegate(fileset, assets.holisticModelUrl);
+  const mirror = new FrameMirror();
   return {
-    extract: (video, timestampMs) => packLandmarks(landmarker.detectForVideo(video, timestampMs)),
+    extract: (video, timestampMs, mirrored) =>
+      packLandmarks(landmarker.detectForVideo(mirrored ? mirror.mirror(video) : video, timestampMs)),
     close: () => landmarker.close(),
   };
 }

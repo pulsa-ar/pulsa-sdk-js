@@ -2,7 +2,7 @@
  * `<pulsa-recognizer>`: the camera feed, pulsa's logo, and optionally the recognised
  * glosses. Reports through callback properties and through DOM events of the same names.
  *
- *   <pulsa-recognizer api-key="pulsa_pk_..." vocabulary="YO,DOLOR" show-glosses></pulsa-recognizer>
+ *   <pulsa-recognizer api-key="pulsa_pk_..." vocabulary="YO,DOLOR" show-glosses left-handed></pulsa-recognizer>
  */
 
 import { explainError, messagesFor, resolveLocale, type Messages } from "../i18n/messages";
@@ -43,7 +43,9 @@ interface Screen {
 }
 
 export class PulsaRecognizerElement extends HTMLElement implements RecognizerCallbacks {
-  static readonly observedAttributes = ["api-key", "endpoint", "vocabulary", "locale", "show-glosses", "mirrored"];
+  static readonly observedAttributes = [
+    "api-key", "endpoint", "vocabulary", "left-handed", "locale", "show-glosses", "mirrored",
+  ];
 
   onReady: ((vocabulary: readonly Sign[]) => void) | undefined;
   onSentence: ((sentence: Sentence) => void) | undefined;
@@ -94,6 +96,10 @@ export class PulsaRecognizerElement extends HTMLElement implements RecognizerCal
 
   attributeChangedCallback(name: string, previous: string | null, next: string | null): void {
     if (previous === next) return;
+    if (name === "left-handed") {
+      this.recognizer?.setLeftHanded(this.leftHanded);
+      return;
+    }
     if (SESSION_ATTRIBUTES.has(name) && this.isConnected && this.started) {
       this.restart();
     } else {
@@ -104,6 +110,10 @@ export class PulsaRecognizerElement extends HTMLElement implements RecognizerCal
   /** Clears the sentence and keeps recognising. */
   reset(): void {
     this.recognizer?.reset();
+  }
+
+  private get leftHanded(): boolean {
+    return this.hasAttribute("left-handed");
   }
 
   private restart(): void {
@@ -124,6 +134,7 @@ export class PulsaRecognizerElement extends HTMLElement implements RecognizerCal
         apiKey,
         ...(endpoint ? { endpoint } : {}),
         ...(vocabulary === undefined ? {} : { vocabulary }),
+        ...(this.leftHanded ? { leftHanded: true } : {}),
       },
       {
         onReady: (signs) => this.showReady(signs),

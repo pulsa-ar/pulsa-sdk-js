@@ -30,10 +30,12 @@ export class FakeCamera implements Camera {
 
 export class FakeExtractor implements LandmarkExtractor {
   extractedAt: number[] = [];
+  mirrored: boolean[] = [];
   closed = false;
 
-  extract(_video: HTMLVideoElement, timestampMs: number): Float32Array {
+  extract(_video: HTMLVideoElement, timestampMs: number, mirrored: boolean): Float32Array {
     this.extractedAt.push(timestampMs);
+    this.mirrored.push(mirrored);
     return new Float32Array(225);
   }
 

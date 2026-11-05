@@ -162,6 +162,20 @@ describe("<pulsa-recognizer>", () => {
     expect(pipeline.connections).toHaveLength(1);
   });
 
+  it("mirrors frames while left-handed, switching without a new session", async () => {
+    const { element, pipeline } = await mount({ "api-key": "pulsa_pk_test_key", "left-handed": "" });
+    pipeline.connection.becomes("ready");
+    pipeline.cameraDeliversFrame(0);
+    element.removeAttribute("left-handed");
+    await settle();
+    pipeline.cameraDeliversFrame(33);
+
+    expect(pipeline.connection.options.leftHanded).toBe(true);
+    expect(pipeline.extractor.mirrored).toEqual([true, false]);
+    expect(pipeline.connection.resets).toEqual([undefined]);
+    expect(pipeline.connections).toHaveLength(1);
+  });
+
   it("resets the sentence on request", async () => {
     const { element, pipeline } = await mount({ "api-key": "pulsa_pk_test_key" });
     element.reset();

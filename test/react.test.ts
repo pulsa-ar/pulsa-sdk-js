@@ -26,6 +26,7 @@ describe("<PulsaRecognizer>", () => {
           apiKey: "pulsa_pk_test_key",
           vocabulary: ["YO", "DOLOR"],
           showGlosses: true,
+          leftHanded: true,
           mirrored: false,
           locale: "en",
           className: "camera",
@@ -40,6 +41,7 @@ describe("<PulsaRecognizer>", () => {
     expect(element.getAttribute("api-key")).toBe("pulsa_pk_test_key");
     expect(element.getAttribute("vocabulary")).toBe("YO,DOLOR");
     expect(element.hasAttribute("show-glosses")).toBe(true);
+    expect(element.hasAttribute("left-handed")).toBe(true);
     expect(element.getAttribute("mirrored")).toBe("false");
     expect(element.getAttribute("locale")).toBe("en");
     expect(element.getAttribute("class")).toBe("camera");

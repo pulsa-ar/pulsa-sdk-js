@@ -65,6 +65,11 @@ distort a sign.
 The landmarks must come from the **unmirrored** frame. Mirroring the preview for the signer
 is fine; mirroring the input swaps the hands, and with them every handed sign.
 
+The one exception is a left-handed signer. The model only knows right-handed signing, so
+flip the camera image left to right *before* MediaPipe sees it, which is how training
+handled left-handed recordings. Don't swap hands in the landmarks afterwards: MediaPipe
+reports a flipped image differently. Send a `reset` when switching handedness mid-session.
+
 The Holistic Landmarker must be the one the model was trained with:
 `holistic_landmarker/float16/1/holistic_landmarker.task`, with minimum face detection, pose
 detection and hand landmark confidences of 0.5.
