@@ -15,7 +15,7 @@ npm install @pulsa/sdk
 Or without a bundler:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@pulsa/sdk@0.2.0/dist/pulsa.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@pulsa/sdk@0.2.1/dist/pulsa.js"></script>
 ```
 
 You need a publishable API key from pulsa. A **test key** (`pulsa_pk_test_...`) works from

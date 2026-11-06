@@ -7,6 +7,14 @@ import { PulsaRecognizer, type PulsaRecognizerHandle } from "../src/react/index"
 import type { RecognizerStatus } from "../src/types";
 import { settle } from "./fakePipeline";
 
+// The wrapper creates the element itself, so its sessions run on stand-ins installed in place
+// of the browser's camera, MediaPipe and socket.
+vi.mock("../src/recognizer/recognizer", async (importOriginal) => {
+  const original = await importOriginal<typeof import("../src/recognizer/recognizer")>();
+  const { FakePipeline } = await import("./fakePipeline");
+  return { ...original, browserDependencies: new FakePipeline() };
+});
+
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 afterEach(() => document.body.replaceChildren());
